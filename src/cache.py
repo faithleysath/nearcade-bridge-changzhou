@@ -64,6 +64,8 @@ async def get_gameid(arcade_name: str) -> int | None:
                     _cache_gameid[arcade_name] = min_gameid
                     logger.info(f"成功从 API 获取机厅 '{arcade_name}' 的 gameid: {min_gameid}")
                     return min_gameid
+            else:
+                logger.warning(f"机厅 '{arcade_name}' 的 API 响应中没有找到游戏信息。")
     except Exception as e:
         logger.error(f"从 API 获取机厅 '{arcade_name}' 的 gameid 失败: {e}，将使用备用 gameid。")
 
