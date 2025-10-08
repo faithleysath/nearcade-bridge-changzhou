@@ -53,7 +53,7 @@ async def get_gameid(arcade_name: str) -> int | None:
         async with AsyncSession() as session:
             response = await session.get(url, timeout=10)
             response.raise_for_status()
-            data = response.json()
+            data = response.json().get("shop", {})
             games = data.get("games", [])
             if games:
                 min_title_id = min((game["titleId"] for game in games), default=None)
