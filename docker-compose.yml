@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  nearcade-bridge:
+    build: .
+    container_name: nearcade-bridge
+    environment:
+      # 强烈建议使用 .env 文件来管理 API_KEY
+      # 在 .env 文件中添加: API_KEY=你的API密钥
+      - API_KEY=${API_KEY}
+    restart: always
+    networks:
+      - nearcade-net
+
+  napcat:
+    # 使用官方的 NapCat Docker 镜像
+    image: mlikiowa/napcat-docker:latest
+    container_name: napcat
+    environment:
+      # 设置 UID 和 GID 以避免权限问题
+      - NAPCAT_UID=${NAPCAT_UID:-1000}
+      - NAPCAT_GID=${NAPCAT_GID:-1000}
+    ports:
+      # 暴露 WebUI 端口，方便扫码登录
+      - "6099:6099"
+    volumes:
+      # 挂载 QQ 数据目录，实现持久化登录
+      - ./qq_data:/app/.config/QQ
+      # 挂载 NapCat 配置文件
+      - ./napcat_config:/app/napcat/config
+    restart: always
+    # 依赖于 nearcade-bridge 服务，确保启动顺序
+    depends_on:
+      - nearcade-bridge
+    networks:
+      - nearcade-net
+
+# 定义一个网络，让服务可以互相通信
+networks:
+  nearcade-net:
+    driver: bridge
