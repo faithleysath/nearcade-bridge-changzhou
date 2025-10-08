@@ -104,13 +104,7 @@ API_KEY=你的API密钥
 
 3.  **配置你的 NapCat 服务**：
 
-    修改你的 NapCat 实例中的 `onebot11.json` 配置文件，找到反向 WebSocket 的配置项 (`websocketClients`)，并将其 `url` 修改为指向运行 `nearcade-bridge` 服务的主机 IP。
-
-    例如，如果你的 `nearcade-bridge` 服务运行在 IP 地址为 `192.168.1.100` 的服务器上，你应该将 `url` 设置为：
-
-    ```json
-    "url": "ws://192.168.1.100:9999"
-    ```
+    修改你的 NapCat 实例中反向 WebSocket (Websocket客户端） 的配置项 ，并将其 `url` 修改为指向`ws://宿主机:9999`
 
 4.  **查看日志和停止服务**：
 
