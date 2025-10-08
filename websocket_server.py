@@ -3,17 +3,34 @@
 import asyncio
 import signal
 from websockets.asyncio.server import serve, ServerConnection
-from websockets.exceptions import ConnectionClosed
+import logging
+from constant import arcade_maps, listen_qq_group, listen_qq_id, arcade_names
+from extract import extract_ordered_tuples
+from upload import upload
+import json
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 global_websocket: ServerConnection | None = None
 
 async def handler(websocket: ServerConnection):
     global global_websocket
     global_websocket = websocket
-    print(f"Client connected from {websocket.remote_address}")
+    logger.info(f"Client connected from {websocket.remote_address}")
     async for message in websocket:
-        print(f"Received message: {message}")
-    print(f"Client disconnected from {websocket.remote_address}")
+        logger.debug(f"Received message: {message}")
+        try:
+            data: dict = json.loads(message)
+            if data.get("group_id") == listen_qq_group and data.get("user_id") == listen_qq_id:
+                text = data.get("raw_message", "")
+                results = extract_ordered_tuples(arcade_names, text)
+                if results:
+                    logger.info(f"Extracted data: {results}")
+                    asyncio.create_task(upload(results))
+        except json.JSONDecodeError:
+            logger.error("Failed to decode JSON message")
+    logger.info(f"Client disconnected from {websocket.remote_address}")
 
 
 async def main():
@@ -22,10 +39,10 @@ async def main():
     loop.add_signal_handler(signal.SIGINT, stop.set_result, None)
 
     async with serve(handler, "0.0.0.0", 9999):
-        print("Server started on ws://0.0.0.0:9999. Press Ctrl+C to exit.")
+        logger.info("Server started on ws://0.0.0.0:9999. Press Ctrl+C to exit.")
         await stop
 
 if __name__ == "__main__":
-    print("Starting server...")
+    logger.info("Starting server...")
     asyncio.run(main())
-    print("Server shut down gracefully.")
+    logger.info("Server shut down gracefully.")
