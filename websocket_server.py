@@ -12,11 +12,8 @@ import json
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-global_websocket: ServerConnection | None = None
 
 async def handler(websocket: ServerConnection):
-    global global_websocket
-    global_websocket = websocket
     logger.info(f"Client connected from {websocket.remote_address}")
     async for message in websocket:
         logger.debug(f"Received message: {message}")
