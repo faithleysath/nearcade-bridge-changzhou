@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 API_KEY = os.getenv("API_KEY", "")
 
 async def upload(arcades_data: list[tuple[str, int]]):
-    upload_payloads = []
+    # 筛选需要上报的机厅
+    arcades_to_report = []
     for arcade, count in arcades_data:
         if not is_report_needed(arcade, count):
             continue
@@ -20,10 +21,26 @@ async def upload(arcades_data: list[tuple[str, int]]):
         if not arcade_info:
             logger.warning(f"未找到机厅 '{arcade}' 的配置信息，已跳过。")
             continue
-            
-        game_id = await get_gameid(arcade)
-        if not game_id:
-            logger.error(f"无法获取机厅 '{arcade}' 的 gameid，已跳过。")
+        
+        arcades_to_report.append({"arcade": arcade, "count": count, "info": arcade_info})
+
+    if not arcades_to_report:
+        logger.info("没有需要更新的数据。")
+        return
+
+    # 并发获取 game_id
+    game_id_tasks = [get_gameid(data["arcade"]) for data in arcades_to_report]
+    results = await asyncio.gather(*game_id_tasks, return_exceptions=True)
+
+    upload_payloads = []
+    for i, result in enumerate(results):
+        arcade_data = arcades_to_report[i]
+        arcade = arcade_data["arcade"]
+        count = arcade_data["count"]
+        arcade_info = arcade_data["info"]
+
+        if isinstance(result, Exception) or result is None:
+            logger.error(f"无法获取机厅 '{arcade}' 的 gameid，已跳过。原因: {result}")
             continue
 
         upload_payloads.append({
@@ -31,12 +48,12 @@ async def upload(arcades_data: list[tuple[str, int]]):
             "count": count,
             "url": API_URL.format(path=arcade_info["path"]),
             "payload": {
-                "games": [{"id": game_id, "currentAttendances": count}]
+                "games": [{"id": result, "currentAttendances": count}]
             }
         })
 
     if not upload_payloads:
-        logger.info("没有需要更新的数据。")
+        logger.info("所有机厅都因无法获取 gameid 而跳过。")
         return
 
     async with AsyncSession(impersonate="chrome") as s:
