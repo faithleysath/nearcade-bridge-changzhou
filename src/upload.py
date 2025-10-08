@@ -53,7 +53,10 @@ async def upload(arcades_data: list[tuple[str, int]]):
                 # Assert the type for both static analysis and runtime safety
                 assert isinstance(result, Response)
                 if result.status_code >= 400:
-                    logger.error(f"上传机厅 '{arcade_name}' 数据失败，状态码: {result.status_code}, 响应: {result.text}")
+                    if "Shop is currently closed" in result.text:
+                        logger.warning(f"机厅 '{arcade_name}' 已打烊，本次未更新。")
+                    else:
+                        logger.error(f"上传机厅 '{arcade_name}' 数据失败，状态码: {result.status_code}, 响应: {result.text}")
                 else:
                     try:
                         data = result.json()
