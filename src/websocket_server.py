@@ -7,6 +7,7 @@ import logging
 from constant import arcade_maps, listen_qq_group, listen_qq_id, arcade_names
 from extract import extract_ordered_tuples
 from upload import upload
+from cache import clear_gameid_cache_periodically
 import json
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -34,6 +35,9 @@ async def main():
     loop = asyncio.get_running_loop()
     stop = loop.create_future()
     loop.add_signal_handler(signal.SIGINT, stop.set_result, None)
+
+    # 启动后台缓存清理任务
+    asyncio.create_task(clear_gameid_cache_periodically())
 
     async with serve(handler, "0.0.0.0", 9999):
         logger.info("Server started on ws://0.0.0.0:9999. Press Ctrl+C to exit.")

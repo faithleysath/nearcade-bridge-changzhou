@@ -75,3 +75,4 @@ listen_qq_group = 568236122
 listen_qq_id = 2970319157
 
 API_URL = "https://nearcade.phizone.cn/api/shops/{path}/attendance"
+GAMEID_API_URL = "https://nearcade.phizone.cn/api/shops/{path}"
