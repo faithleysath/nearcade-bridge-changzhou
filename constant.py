@@ -35,10 +35,6 @@ arcade_maps = {
         "path": "bemanicn/5487",
         "gameid": 13776
     },
-    "湖酷": {
-        "path": "bemanicn/5365",
-        "gameid": 13355
-    },
     "龙嗨": {
         "path": "bemanicn/2261",
         "gameid": 5945
@@ -66,10 +62,6 @@ arcade_maps = {
     "星星": {
         "path": "bemanicn/4093",
         "gameid": 10378
-    },
-    "又乐": {
-        "path": "bemanicn/5925",
-        "gameid": 14841
     },
     "中超": {
         "path": "bemanicn/3386",
