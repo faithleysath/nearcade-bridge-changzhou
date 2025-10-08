@@ -104,7 +104,7 @@ API_KEY=你的API密钥
 
 3.  **配置你的 NapCat 服务**：
 
-    修改你的 NapCat 实例中反向 WebSocket (Websocket客户端） 的配置项 ，并将其 `url` 修改为指向`ws://宿主机:9999`
+    修改你的 NapCat 实例中反向 WebSocket (Websocket客户端） 的配置项 ，并将其 `url` 修改为指向`ws://宿主机ip:9999`
 
 4.  **查看日志和停止服务**：
 
