@@ -4,7 +4,6 @@ from curl_cffi.requests import Response
 from constant import API_URL, arcade_maps
 import os
 import logging
-from typing import cast
 
 logger = logging.getLogger(__name__)
 API_KEY = os.getenv("API_KEY", "")
@@ -39,16 +38,16 @@ async def upload(arcades_data: list[tuple[str, int]]):
             if isinstance(result, Exception):
                 logger.error(f"上传机厅 '{arcade_name}' 数据失败: {result}")
             else:
-                # Explicitly cast the type to silence Pylance warnings
-                response = cast(Response, result)
-                if response.status_code >= 400:
-                    logger.error(f"上传机厅 '{arcade_name}' 数据失败，状态码: {response.status_code}, 响应: {response.text}")
+                # Assert the type for both static analysis and runtime safety
+                assert isinstance(result, Response)
+                if result.status_code >= 400:
+                    logger.error(f"上传机厅 '{arcade_name}' 数据失败，状态码: {result.status_code}, 响应: {result.text}")
                 else:
                     try:
-                        data = response.json()
+                        data = result.json()
                         if data.get("success"):
                             logger.info(f"成功上传机厅 '{arcade_name}' 的数据。")
                         else:
-                            logger.error(f"上传机厅 '{arcade_name}' 数据失败，API返回失败状态, 响应: {response.text}")
+                            logger.error(f"上传机厅 '{arcade_name}' 数据失败，API返回失败状态, 响应: {result.text}")
                     except Exception:
-                        logger.error(f"上传机厅 '{arcade_name}' 数据失败，无法解析响应JSON, 状态码: {response.status_code}, 响应: {response.text}")
+                        logger.error(f"上传机厅 '{arcade_name}' 数据失败，无法解析响应JSON, 状态码: {result.status_code}, 响应: {result.text}")
