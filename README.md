@@ -86,6 +86,42 @@ API_KEY=你的API密钥
     docker-compose down
     ```
 
+## 独立部署 (不包含 NapCat)
+
+如果你已经在其他地方运行了 NapCat 服务，或者希望将 `nearcade-bridge` 连接到非 Docker 化的 NapCat 实例，你可以使用 `docker-compose.standalone.yml` 文件。
+
+这个配置文件只会启动 `nearcade-bridge` 服务，并将其 WebSocket 端口 `9999` 暴露在你的主机上。
+
+### 运行步骤
+
+1.  **确保 `.env` 文件已创建**并包含你的 `API_KEY`。
+
+2.  **使用 `docker-compose.standalone.yml` 启动服务**：
+
+    ```bash
+    docker-compose -f docker-compose.standalone.yml up -d
+    ```
+
+3.  **配置你的 NapCat 服务**：
+
+    修改你的 NapCat 实例中的 `onebot11.json` 配置文件，找到反向 WebSocket 的配置项 (`websocketClients`)，并将其 `url` 修改为指向运行 `nearcade-bridge` 服务的主机 IP。
+
+    例如，如果你的 `nearcade-bridge` 服务运行在 IP 地址为 `192.168.1.100` 的服务器上，你应该将 `url` 设置为：
+
+    ```json
+    "url": "ws://192.168.1.100:9999"
+    ```
+
+4.  **查看日志和停止服务**：
+
+    ```bash
+    # 查看日志
+    docker-compose -f docker-compose.standalone.yml logs -f
+
+    # 停止服务
+    docker-compose -f docker-compose.standalone.yml down
+    ```
+
 ## 二次开发：适配其他城市
 
 如果你希望将此项目用于常州以外的其他城市，主要需要修改 `src/constant.py` 文件中的配置。

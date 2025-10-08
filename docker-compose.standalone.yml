@@ -1,0 +1,24 @@
+version: '3.8'
+
+# 这是为已经独立运行了 NapCat 服务的用户准备的 Compose 文件。
+# 它只启动 nearcade-bridge 服务，并暴露 WebSocket 端口以接收来自外部 NapCat 的连接。
+#
+# 使用方法:
+# 1. 确保你的 .env 文件已配置好 API_KEY。
+# 2. 运行: docker-compose -f docker-compose.standalone.yml up -d
+# 3. 修改你现有 NapCat 服务的 onebot11.json 配置文件，
+#    将其中的反向 WebSocket 地址指向运行此服务的主机 IP 和端口 9999，
+#    例如: "url": "ws://<你的服务器IP>:9999"
+
+services:
+  nearcade-bridge:
+    build: .
+    container_name: nearcade-bridge
+    environment:
+      # 强烈建议使用 .env 文件来管理 API_KEY
+      # 在 .env 文件中添加: API_KEY=你的API密钥
+      - API_KEY=${API_KEY}
+    ports:
+      # 暴露 WebSocket 端口，方便外部 NapCat 连接
+      - "9999:9999"
+    restart: always
