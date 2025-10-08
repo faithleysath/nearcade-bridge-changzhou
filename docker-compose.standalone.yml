@@ -6,9 +6,7 @@ version: '3.8'
 # 使用方法:
 # 1. 确保你的 .env 文件已配置好 API_KEY。
 # 2. 运行: docker-compose -f docker-compose.standalone.yml up -d
-# 3. 修改你现有 NapCat 服务的 onebot11.json 配置文件，
-#    将其中的反向 WebSocket 地址指向运行此服务的主机 IP 和端口 9999，
-#    例如: "url": "ws://<你的服务器IP>:9999"
+# 3. 修改你现有 NapCat 服务的 Websocket客户端 配置
 
 services:
   nearcade-bridge:
