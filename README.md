@@ -86,6 +86,93 @@ API_KEY=你的API密钥
     docker-compose down
     ```
 
+## 二次开发：适配其他城市
+
+如果你希望将此项目用于常州以外的其他城市，主要需要修改 `src/constant.py` 文件中的配置。
+
+### 1. 修改机厅信息
+
+核心是更新 `arcade_maps` 字典。你需要为你的城市的每个机厅添加一个条目。
+
+```python
+# src/constant.py
+
+arcade_maps = {
+    "你的机厅简称1": {
+        "path": "从Nearcade网站上找到的路径",
+        "gameid": 从Nearcade网站上找到的游戏ID
+    },
+    "你的机厅简称2": {
+        "path": "...",
+        "gameid": ...
+    },
+    # ...
+}
+```
+
+-   **机厅简称**: 一个简短易记的中文名，机器人将通过这个名字从QQ消息中识别机厅。
+-   **`path`**: 机厅在 Nearcade 网站上的唯一路径。通常可以在机厅页面的 URL 中找到，格式类似于 `bemanicn/xxxx`，例如可以从[https://nearcade.phizone.cn/shops/bemanicn/4246](https://nearcade.phizone.cn/shops/bemanicn/4246)中提取`bemanicn/4246`。
+-   **`gameid`**: 你要更新人数的游戏在该机厅的唯一 ID。 你可以在[获取店铺详情](https://nearcade.apifox.cn/350651823e0)页面，点击`调试`按钮，查看返回的 JSON 数据中对应游戏的 `gameid`。如果有多个，建议默认用`titleId`最小，`gameId`最小的那个。
+
+`arcade_names` 列表会自动根据 `arcade_maps` 生成，无需手动修改。
+
+### 2. 修改监听的 QQ 群和用户
+
+同样在 `src/constant.py` 文件中，你需要更新以下两个变量：
+
+```python
+# src/constant.py
+
+# 你要监听的QQ群号
+listen_qq_group = 123456789
+# 发送人数信息的QQ号 (通常那个群里的改卡机器人)
+listen_qq_id = 987654321
+```
+
+-   `listen_qq_group`: 设置为你的机器人所在的，用来播报人数的 QQ 群号。
+-   `listen_qq_id`: 设置为播报人数消息的 QQ 用户号。只有来自这个 QQ 号的消息才会被处理，以避免响应无关消息。
+
+### 3. (可选) 修改消息提取逻辑
+
+本项目默认的消息提取逻辑位于 `src/extract.py` 文件中，它依赖一个正则表达式来匹配 `机厅名` 和 `人数`。
+
+当前的正则表达式假定消息格式为：`[机厅名]...[数字]人`。
+
+示例：
+```
+...
+宁天 当前 0 人
+[上次更新于1小时20分前]
+万乐 当前 2 人
+[上次更新于1小时01分前]
+...
+```
+```
+收到！万乐现在有2人
+```
+```
+人数没有变化哦，中超还是2个人
+```
+
+如果你的 QQ 群播报格式不同（例如，使用 `：` 分隔，或者没有 `人` 字），你可能需要修改 `src/extract.py` 文件中的 `pattern` 变量。
+
+```python
+# src/extract.py
+
+# ...
+    # 默认格式: (机厅名).*?(数字)个?人
+    pattern = re.compile(f"({keyword_part}).*?(\d+)\s*个?人")
+# ...
+```
+
+你需要根据你的实际消息格式，调整这个正则表达式以确保能正确提取信息。
+
+完成以上修改后，重新构建并启动 Docker 容器即可让机器人为你所在的城市服务。
+
+```bash
+docker-compose up -d --build
+```
+
 ## 文件结构
 
 -   `Dockerfile`: 用于构建 `nearcade-bridge` 服务的镜像。
